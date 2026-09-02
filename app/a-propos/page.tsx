@@ -1,13 +1,13 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
-import { useRef } from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import AnimatedText from '@/components/ui/AnimatedText';
 import Button from '@/components/ui/Button';
-import { siteConfig } from '@/data/site';
-import { Shield, Users, Award, Compass } from 'lucide-react';
+import { defaultSiteContent } from '@/lib/defaultContent';
+import { Shield, Users, Award, Compass, Target, Eye } from 'lucide-react';
 
 const values = [
   {
@@ -58,6 +58,23 @@ const timeline = [
 ];
 
 export default function AboutPage() {
+  const [aboutData, setAboutData] = useState(defaultSiteContent.about);
+
+  useEffect(() => {
+    async function fetchAbout() {
+      try {
+        const res = await fetch('/api/content?section=about');
+        const data = await res.json();
+        if (data.success && data.data) {
+          setAboutData(data.data);
+        }
+      } catch (err) {
+        // fallback
+      }
+    }
+    fetchAbout();
+  }, []);
+
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -66,13 +83,15 @@ export default function AboutPage() {
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  const heroTitle = aboutData?.hero?.title || "L'AMBITION DE CONSTRUIRE";
+
   return (
     <>
       {/* Hero */}
       <section ref={heroRef} className="relative h-[70vh] min-h-[500px] overflow-hidden">
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&q=80"
+            src={aboutData?.hero?.bgImage || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&q=80'}
             alt="MPANORINA NOFY - À propos"
             fill
             className="object-cover"
@@ -91,10 +110,11 @@ export default function AboutPage() {
               transition={{ delay: 0.3 }}
               className="inline-block text-gold-400 text-sm tracking-[0.3em] uppercase mb-6"
             >
-              Notre Histoire
+              {aboutData?.hero?.subtitle || 'Notre Histoire'}
             </motion.span>
             <AnimatedText
-              text={siteConfig.aboutTitle}
+              key={heroTitle}
+              text={heroTitle}
               tag="h1"
               className="text-hero font-display text-white justify-center"
               delay={0.5}
@@ -103,57 +123,101 @@ export default function AboutPage() {
         </motion.div>
       </section>
 
-      {/* Introduction */}
+      {/* Introduction Story */}
       <section className="section-padding bg-light">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <ScrollReveal>
-                <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-medium">
+                <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-semibold">
                   Qui Sommes-Nous
                 </span>
               </ScrollReveal>
               <ScrollReveal delay={0.1}>
                 <h2 className="text-section font-bold text-dark mt-4 mb-8">
-                  Une entreprise bâtie sur l&apos;excellence
+                  {aboutData?.story?.title || "Une entreprise bâtie sur l'excellence"}
                 </h2>
               </ScrollReveal>
               <ScrollReveal delay={0.2}>
                 <p className="text-muted text-lg leading-relaxed mb-6">
-                  {siteConfig.introText}
+                  {aboutData?.story?.p1 || "Fondée avec la volonté de redéfinir les standards de la construction à Madagascar, MPANORINA NOFY s'est imposée comme un acteur de référence dans le secteur du bâtiment et des travaux de gros œuvre."}
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={0.3}>
-                <p className="text-muted leading-relaxed mb-8">
-                  Notre mission est simple : transformer chaque vision en une construction solide,
-                  durable et belle. Nous croyons que chaque projet mérite une attention
-                  exceptionnelle, un engagement total et un savoir-faire irréprochable.
+                <p className="text-muted leading-relaxed mb-6">
+                  {aboutData?.story?.p2 || 'Notre nom, qui signifie "Bâtisseur de Rêves", incarne notre mission fondamentale : transformer les aspirations architecturales de nos clients en structures solides, durables et élégantes.'}
                 </p>
               </ScrollReveal>
+              {aboutData?.story?.p3 && (
+                <ScrollReveal delay={0.35}>
+                  <p className="text-muted leading-relaxed mb-8">
+                    {aboutData.story.p3}
+                  </p>
+                </ScrollReveal>
+              )}
               <ScrollReveal delay={0.4}>
                 <div className="line-accent" />
               </ScrollReveal>
             </div>
             <ScrollReveal direction="right" className="relative">
-              <div className="relative h-[500px] rounded-sm overflow-hidden">
+              <div className="relative h-[480px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
                 <Image
-                  src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80"
+                  src={aboutData?.story?.image || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80'}
                   alt="Construction MPANORINA NOFY"
                   fill
                   className="object-cover"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gold-500/10 rounded-sm -z-10" />
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gold-500/10 rounded-2xl -z-10" />
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Mission */}
+      <section className="py-20 bg-light-gray border-y border-border-light">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <ScrollReveal>
+              <div className="bg-white p-8 md:p-10 rounded-2xl border border-border-light shadow-sm h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-6">
+                    <Eye className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-dark mb-4">
+                    {aboutData?.vision?.visionTitle || 'Notre Vision'}
+                  </h3>
+                  <p className="text-muted leading-relaxed text-base">
+                    {aboutData?.vision?.visionText || 'Devenir le partenaire de référence pour la construction durable et moderne à Madagascar, en alliant innovation technique, respect des normes internationales et valorisation des compétences locales.'}
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.15}>
+              <div className="bg-white p-8 md:p-10 rounded-2xl border border-border-light shadow-sm h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-gold-50 text-gold-600 flex items-center justify-center mb-6">
+                    <Target className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-dark mb-4">
+                    {aboutData?.vision?.missionTitle || 'Notre Mission'}
+                  </h3>
+                  <p className="text-muted leading-relaxed text-base">
+                    {aboutData?.vision?.missionText || 'Bâtir des structures d’excellence qui traversent le temps, en offrant à nos clients un accompagnement personnalisé, une transparence totale et une rigueur sans compromis.'}
+                  </p>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="section-padding bg-light-gray">
+      <section className="section-padding bg-light">
         <div className="container-custom">
           <ScrollReveal className="text-center mb-16">
-            <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-medium">
+            <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-semibold">
               Nos Valeurs
             </span>
             <h2 className="text-section font-bold text-dark mt-4">
@@ -165,7 +229,7 @@ export default function AboutPage() {
             {values.map((value, i) => (
               <ScrollReveal key={value.title} delay={i * 0.1}>
                 <motion.div
-                  className="bg-white p-8 rounded-sm border border-border-light hover:border-teal-200 transition-colors duration-300"
+                  className="bg-white p-8 rounded-xl border border-border-light shadow-sm hover:border-teal-300 transition-colors duration-300"
                   whileHover={{ y: -5 }}
                 >
                   <value.icon className="w-8 h-8 text-teal-500 mb-5" />
@@ -181,10 +245,10 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline */}
-      <section className="section-padding bg-light">
+      <section className="section-padding bg-light-gray">
         <div className="container-narrow">
           <ScrollReveal className="text-center mb-20">
-            <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-medium">
+            <span className="text-gold-500 text-sm tracking-[0.2em] uppercase font-semibold">
               Notre Parcours
             </span>
             <h2 className="text-section font-bold text-dark mt-4">

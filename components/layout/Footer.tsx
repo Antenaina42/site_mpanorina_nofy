@@ -120,12 +120,20 @@ export default function Footer() {
           <p className="text-muted text-xs">
             © {currentYear} {siteConfig.name}. Tous droits réservés.
           </p>
-          <div className="flex items-center gap-6 text-xs text-muted">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted">
             <span>Construire aujourd&apos;hui les projets de demain.</span>
             <span>•</span>
-            <Link href="/admin" className="text-teal-600 hover:text-teal-700 font-semibold transition-colors">
-              Espace Administration
-            </Link>
+            <span>
+              Site créé par{' '}
+              <a
+                href="https://m-itlevelup.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-teal-700 hover:text-gold-600 font-semibold transition-colors hover:underline"
+              >
+                M-It LevelUp
+              </a>
+            </span>
           </div>
         </div>
       </div>

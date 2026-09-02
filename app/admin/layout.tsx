@@ -49,6 +49,12 @@ export default function AdminLayout({
       exact: true,
     },
     {
+      label: 'Modifier le Contenu (CMS)',
+      href: '/admin/contenu',
+      icon: Layers,
+      exact: false,
+    },
+    {
       label: 'Gestion des Projets',
       href: '/admin/projets',
       icon: Building2,

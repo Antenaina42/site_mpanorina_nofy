@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { projects as defaultProjects, type Project } from '@/data/projects';
+import { defaultSiteContent } from '@/lib/defaultContent';
 
 // Database configuration with environment variables and sensible WAMP defaults
 const dbConfig = {
@@ -16,8 +17,9 @@ const dbConfig = {
 let pool: mysql.Pool | null = null;
 let isInitialized = false;
 
-// Fallback in-memory store in case MySQL is offline
+// Fallback in-memory stores in case MySQL is offline
 let memoryStore: Project[] = [...defaultProjects];
+let memoryContentStore: Record<string, any> = { ...defaultSiteContent };
 
 export async function getDbPool(): Promise<mysql.Pool | null> {
   if (pool) return pool;
@@ -52,8 +54,8 @@ export async function initDatabase(): Promise<boolean> {
     const currentPool = await getDbPool();
     if (!currentPool) return false;
 
-    // Create projects table if not exists
-    const createTableQuery = `
+    // 1. Create projects table
+    const createProjectsTableQuery = `
       CREATE TABLE IF NOT EXISTS projects (
         id INT AUTO_INCREMENT PRIMARY KEY,
         slug VARCHAR(255) NOT NULL UNIQUE,
@@ -72,12 +74,21 @@ export async function initDatabase(): Promise<boolean> {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `;
+    await currentPool.query(createProjectsTableQuery);
 
-    await currentPool.query(createTableQuery);
+    // 2. Create site_content table for full CMS control
+    const createContentTableQuery = `
+      CREATE TABLE IF NOT EXISTS site_content (
+        section_key VARCHAR(100) PRIMARY KEY,
+        content_json JSON NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+    await currentPool.query(createContentTableQuery);
 
-    // Check if table is empty to seed initial default projects
-    const [rows]: any = await currentPool.query('SELECT COUNT(*) as count FROM projects');
-    if (rows[0]?.count === 0) {
+    // Seed default projects if empty
+    const [projectRows]: any = await currentPool.query('SELECT COUNT(*) as count FROM projects');
+    if (projectRows[0]?.count === 0) {
       console.log('[DB] Seeding default projects into MySQL...');
       for (const p of defaultProjects) {
         await currentPool.query(
@@ -98,6 +109,18 @@ export async function initDatabase(): Promise<boolean> {
             p.details?.duration || '',
             p.details?.type || '',
           ]
+        );
+      }
+    }
+
+    // Seed default site content if empty
+    const [contentRows]: any = await currentPool.query('SELECT COUNT(*) as count FROM site_content');
+    if (contentRows[0]?.count === 0) {
+      console.log('[DB] Seeding default site content into MySQL...');
+      for (const [key, val] of Object.entries(defaultSiteContent)) {
+        await currentPool.query(
+          'INSERT INTO site_content (section_key, content_json) VALUES (?, ?)',
+          [key, JSON.stringify(val)]
         );
       }
     }
@@ -142,7 +165,7 @@ export function mapRowToProject(row: any): Project {
   };
 }
 
-// Database helper operations
+// Projects operations
 export async function getAllProjectsFromDb(): Promise<{ projects: Project[]; isDbConnected: boolean }> {
   try {
     await initDatabase();
@@ -305,4 +328,78 @@ export async function deleteProjectFromDb(id: string): Promise<boolean> {
   const memoryDeleted = memoryStore.length < initialCount;
 
   return dbDeleted || memoryDeleted || true;
+}
+
+// ----------------------------------------------------
+// Site Content CMS Operations (Full site text & image management)
+// ----------------------------------------------------
+export async function getAllSiteContentFromDb(): Promise<{ content: Record<string, any>; isDbConnected: boolean }> {
+  try {
+    await initDatabase();
+    const currentPool = await getDbPool();
+
+    if (currentPool) {
+      const [rows]: any = await currentPool.query('SELECT * FROM site_content');
+      if (rows && rows.length > 0) {
+        const fullContent: Record<string, any> = { ...defaultSiteContent };
+        for (const row of rows) {
+          try {
+            fullContent[row.section_key] = typeof row.content_json === 'string'
+              ? JSON.parse(row.content_json)
+              : row.content_json;
+          } catch (e) {
+            // keep default
+          }
+        }
+        return { content: fullContent, isDbConnected: true };
+      }
+    }
+  } catch (error) {
+    console.warn('[DB] Query error in getAllSiteContentFromDb:', error);
+  }
+
+  return { content: memoryContentStore, isDbConnected: false };
+}
+
+export async function getSectionContentFromDb(sectionKey: string): Promise<any> {
+  try {
+    await initDatabase();
+    const currentPool = await getDbPool();
+
+    if (currentPool) {
+      const [rows]: any = await currentPool.query('SELECT * FROM site_content WHERE section_key = ? LIMIT 1', [sectionKey]);
+      if (rows && rows.length > 0) {
+        const val = rows[0].content_json;
+        return typeof val === 'string' ? JSON.parse(val) : val;
+      }
+    }
+  } catch (error) {
+    console.warn(`[DB] Query error for section ${sectionKey}:`, error);
+  }
+
+  return memoryContentStore[sectionKey] || defaultSiteContent[sectionKey] || null;
+}
+
+export async function saveSectionContentToDb(sectionKey: string, contentData: any): Promise<boolean> {
+  try {
+    await initDatabase();
+    const currentPool = await getDbPool();
+
+    if (currentPool) {
+      const jsonStr = JSON.stringify(contentData);
+      await currentPool.query(
+        `INSERT INTO site_content (section_key, content_json) 
+         VALUES (?, ?) 
+         ON DUPLICATE KEY UPDATE content_json = ?`,
+        [sectionKey, jsonStr, jsonStr]
+      );
+      memoryContentStore[sectionKey] = contentData;
+      return true;
+    }
+  } catch (error) {
+    console.warn(`[DB] Save content error for section ${sectionKey}:`, error);
+  }
+
+  memoryContentStore[sectionKey] = contentData;
+  return true;
 }

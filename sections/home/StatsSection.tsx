@@ -1,28 +1,35 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CountUp from '@/components/ui/CountUp';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { stats } from '@/data/stats';
+import { defaultSiteContent } from '@/lib/defaultContent';
 
 export default function StatsSection() {
-  const fallbackStats = [
-    { value: 15, label: "Années d'expérience", suffix: '+' },
-    { value: 120, label: 'Projets réalisés', suffix: '+' },
-    { value: 50, label: 'Experts qualifiés', suffix: '' },
-    { value: 100, label: 'Clients satisfaits', suffix: '%' },
-  ];
+  const [statsData, setStatsData] = useState(defaultSiteContent.stats.items);
 
-  const displayStats = stats || fallbackStats;
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/content?section=stats');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data?.items)) {
+          setStatsData(data.data.items);
+        }
+      } catch (err) {
+        // fallback
+      }
+    }
+    fetchStats();
+  }, []);
 
   return (
     <section className="bg-teal-700 py-20 md:py-28 relative overflow-hidden">
-      {/* Subtle background pattern or overlay */}
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent pointer-events-none" />
       
-      <div className="container mx-auto px-4 md:px-8 relative z-10">
+      <div className="container mx-auto px-4 md:px-8 relative z-10 max-w-7xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-          {displayStats.map((stat, index) => (
+          {statsData.map((stat: any, index: number) => (
             <ScrollReveal 
               key={index} 
               delay={index * 0.1}

@@ -1,14 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import AnimatedText from '@/components/ui/AnimatedText';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { siteConfig } from '@/data/site';
 import { ShieldCheck, Award } from 'lucide-react';
+import { defaultSiteContent } from '@/lib/defaultContent';
 
 export default function IntroSection() {
-  const introImage = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80';
+  const [introData, setIntroData] = useState(defaultSiteContent.home.intro);
+
+  useEffect(() => {
+    async function fetchIntro() {
+      try {
+        const res = await fetch('/api/content?section=home');
+        const data = await res.json();
+        if (data.success && data.data?.intro) {
+          setIntroData(data.data.intro);
+        }
+      } catch (err) {
+        // fallback
+      }
+    }
+    fetchIntro();
+  }, []);
+
+  const introImage = introData.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80';
 
   return (
     <section className="bg-[#FAFAF8] py-20 md:py-28 lg:py-32 px-5 sm:px-6 lg:px-8 overflow-hidden">
@@ -19,11 +36,11 @@ export default function IntroSection() {
           <div className="lg:col-span-7 flex flex-col justify-center">
             <div className="mb-8">
               <AnimatedText 
-                text={siteConfig.introTitle?.[0] || "BÂTIR AUJOURD'HUI."} 
+                text={introData.title1 || "BÂTIR AUJOURD'HUI."} 
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold text-dark mb-2"
               />
               <AnimatedText 
-                text={siteConfig.introTitle?.[1] || "IMAGINER DEMAIN."} 
+                text={introData.title2 || "IMAGINER DEMAIN."} 
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold text-dark text-opacity-70"
               />
             </div>
@@ -32,7 +49,7 @@ export default function IntroSection() {
             
             <ScrollReveal>
               <p className="text-base sm:text-lg md:text-xl text-muted font-inter max-w-2xl leading-relaxed mb-8">
-                {siteConfig?.introText || "MPANORINA NOFY est une entreprise de construction ambitieuse, fondée avec la conviction que chaque projet mérite excellence et engagement. Spécialisés dans le gros œuvre et la construction de bâtiments à Madagascar, nous transformons les visions architecturales en réalités solides et durables."}
+                {introData.text || "MPANORINA NOFY est une entreprise de construction ambitieuse, fondée avec la conviction que chaque projet mérite excellence et engagement. Spécialisés dans le gros œuvre et la construction de bâtiments à Madagascar, nous transformons les visions architecturales en réalités solides et durables."}
               </p>
             </ScrollReveal>
 
@@ -43,8 +60,8 @@ export default function IntroSection() {
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-dark text-sm">Gros Œuvre &amp; Solidité</h4>
-                    <p className="text-xs text-muted mt-0.5">Normes de construction strictes</p>
+                    <h4 className="font-bold text-dark text-sm">{introData.point1Title || 'Gros Œuvre & Solidité'}</h4>
+                    <p className="text-xs text-muted mt-0.5">{introData.point1Desc || 'Normes de construction strictes'}</p>
                   </div>
                 </div>
 
@@ -53,8 +70,8 @@ export default function IntroSection() {
                     <Award className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-dark text-sm">Savoir-Faire Premium</h4>
-                    <p className="text-xs text-muted mt-0.5">Équipe qualifiée &amp; rigueur</p>
+                    <h4 className="font-bold text-dark text-sm">{introData.point2Title || 'Savoir-Faire Premium'}</h4>
+                    <p className="text-xs text-muted mt-0.5">{introData.point2Desc || 'Équipe qualifiée & rigueur'}</p>
                   </div>
                 </div>
               </div>
@@ -74,24 +91,22 @@ export default function IntroSection() {
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 
-                {/* Subtle dark gradient overlay for depth */}
                 <div className="absolute inset-0 bg-gradient-to-t from-dark/50 via-transparent to-transparent opacity-60" />
 
                 {/* Floating Badge */}
                 <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/40 flex items-center justify-between">
                   <div>
                     <span className="text-[11px] uppercase tracking-widest text-gold-600 font-bold block">
-                      MPANORINA NOFY
+                      {introData.badgeSubtitle || 'MPANORINA NOFY'}
                     </span>
                     <span className="text-sm font-bold text-dark">
-                      Excellence &amp; Gros Œuvre à Madagascar
+                      {introData.badgeTitle || 'Excellence & Gros Œuvre à Madagascar'}
                     </span>
                   </div>
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
               </div>
 
-              {/* Decorative accent element behind the image */}
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-gold-500/10 rounded-2xl -z-10 hidden sm:block" />
             </ScrollReveal>
           </div>

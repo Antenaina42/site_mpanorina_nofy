@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { siteConfig } from '@/data/site';
 import Button from '@/components/ui/Button';
+import { defaultSiteContent } from '@/lib/defaultContent';
 
 const wordVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -28,15 +28,32 @@ const fadeVariants = {
 };
 
 export default function HeroSection() {
-  const title = 'NOUS CONSTRUISONS VOS RÊVES';
-  const words = title.split(' ');
+  const [heroData, setHeroData] = useState(defaultSiteContent.home.hero);
+
+  useEffect(() => {
+    async function fetchHero() {
+      try {
+        const res = await fetch('/api/content?section=home');
+        const data = await res.json();
+        if (data.success && data.data?.hero) {
+          setHeroData(data.data.hero);
+        }
+      } catch (err) {
+        // fallback
+      }
+    }
+    fetchHero();
+  }, []);
+
+  const title = heroData?.title || 'NOUS CONSTRUISONS VOS RÊVES';
+  const words: string[] = typeof title === 'string' ? title.split(' ') : [];
 
   return (
     <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-dark">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80"
+          src={heroData.bgImage || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80'}
           alt="Construction background"
           fill
           priority
@@ -49,6 +66,7 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 md:px-6 flex flex-col items-center text-center mt-20">
         <motion.div
+          key={title}
           className="overflow-hidden mb-6"
           variants={sentenceVariants}
           initial="hidden"
@@ -58,7 +76,7 @@ export default function HeroSection() {
             {words.map((word, idx) => (
               <motion.span
                 key={idx}
-                className="inline-block mr-[0.2em]"
+                className="inline-block mr-[0.25em]"
                 variants={wordVariants}
               >
                 {word}
@@ -73,7 +91,7 @@ export default function HeroSection() {
           animate="visible"
           className="text-lg md:text-xl lg:text-2xl text-white/80 max-w-2xl mb-10 font-inter"
         >
-          De la vision aux fondations. Des fondations à la réalité.
+          {heroData.subtitle || 'De la vision aux fondations. Des fondations à la réalité.'}
         </motion.p>
 
         <motion.div
@@ -83,16 +101,16 @@ export default function HeroSection() {
           className="flex flex-col sm:flex-row items-center gap-4"
         >
           <Button
-            href="/realisations"
+            href={heroData.btnSecondaryHref || '/realisations'}
             className="border-white text-white hover:bg-white hover:text-dark bg-transparent border-2"
           >
-            Découvrir nos réalisations
+            {heroData.btnSecondaryText || 'Nos réalisations'}
           </Button>
           <Button
-            href="/contact"
+            href={heroData.btnPrimaryHref || '/contact'}
             className="bg-gold-500 text-white hover:bg-gold-600 border-2 border-gold-500 hover:border-gold-600"
           >
-            Demander un devis
+            {heroData.btnPrimaryText || 'Demander un devis'}
           </Button>
         </motion.div>
       </div>
