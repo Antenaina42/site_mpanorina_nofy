@@ -18,8 +18,20 @@ let pool: mysql.Pool | null = null;
 let isInitialized = false;
 
 // Fallback in-memory stores in case MySQL is offline
-let memoryStore: Project[] = [...defaultProjects];
-let memoryContentStore: Record<string, any> = { ...defaultSiteContent };
+const globalForDb = globalThis as unknown as {
+  memoryStore: Project[];
+  memoryContentStore: Record<string, any>;
+};
+
+if (!globalForDb.memoryStore) {
+  globalForDb.memoryStore = [...defaultProjects];
+}
+if (!globalForDb.memoryContentStore) {
+  globalForDb.memoryContentStore = { ...defaultSiteContent };
+}
+
+const memoryStore = globalForDb.memoryStore;
+const memoryContentStore = globalForDb.memoryContentStore;
 
 export async function getDbPool(): Promise<mysql.Pool | null> {
   if (pool) return pool;
@@ -321,11 +333,11 @@ export async function deleteProjectFromDb(id: string): Promise<boolean> {
   }
 
   // Also remove from in-memory fallback store
-  const initialCount = memoryStore.length;
-  memoryStore = memoryStore.filter(
+  const initialCount = globalForDb.memoryStore.length;
+  globalForDb.memoryStore = globalForDb.memoryStore.filter(
     (p) => String(p.id) !== String(id) && p.slug !== id
   );
-  const memoryDeleted = memoryStore.length < initialCount;
+  const memoryDeleted = globalForDb.memoryStore.length < initialCount;
 
   return dbDeleted || memoryDeleted || true;
 }

@@ -128,4 +128,8 @@ export const defaultSiteContent: Record<string, any> = {
       { value: 25, prefix: '+', suffix: '', label: 'Experts & Ouvriers' },
     ],
   },
+  seo: {
+    isIndexed: true, // true = Indexé sur Google, false = Désindexé (noindex, nofollow)
+    updatedAt: new Date().toISOString(),
+  },
 };

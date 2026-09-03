@@ -15,11 +15,13 @@ import {
   AlertCircle,
   RefreshCw,
   Sparkles,
+  Globe,
 } from 'lucide-react';
 import { defaultSiteContent } from '@/lib/defaultContent';
+import SeoIndexingCard from '@/components/admin/SeoIndexingCard';
 
 export default function AdminContentPage() {
-  const [activeTab, setActiveTab] = useState<'home' | 'about' | 'services' | 'contact' | 'stats'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'about' | 'services' | 'contact' | 'stats' | 'seo'>('home');
   const [content, setContent] = useState<any>(defaultSiteContent);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -152,6 +154,7 @@ export default function AdminContentPage() {
     { id: 'services', label: 'Page Services', icon: Layers },
     { id: 'contact', label: 'Contact & Réseaux', icon: Phone },
     { id: 'stats', label: 'Chiffres Clés', icon: BarChart3 },
+    { id: 'seo', label: 'Indexation Google (SEO)', icon: Globe },
   ];
 
   return (
@@ -927,6 +930,13 @@ export default function AdminContentPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Tab 6: SEO & Google Indexing */}
+      {activeTab === 'seo' && (
+        <div className="space-y-6">
+          <SeoIndexingCard />
         </div>
       )}
 

@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { type Project } from '@/data/projects';
+import SeoIndexingCard from '@/components/admin/SeoIndexingCard';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -73,7 +74,13 @@ export default function AdminDashboardPage() {
             className="bg-gold-500 hover:bg-gold-400 text-dark font-bold text-sm px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2"
           >
             <PlusCircle className="w-4 h-4" />
-            Ajouter un projet
+            Nouveau Projet
+          </Link>
+          <Link
+            href="/admin/contenu"
+            className="bg-white/15 hover:bg-white/25 text-white font-bold text-sm px-5 py-3 rounded-xl transition-all flex items-center gap-2"
+          >
+            Modifier le Contenu
           </Link>
           <Link
             href="/admin/projets"
@@ -84,6 +91,9 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* SEO / Google Indexing Card */}
+      <SeoIndexingCard />
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

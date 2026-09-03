@@ -7,6 +7,8 @@ import Footer from '@/components/layout/Footer';
 import Preloader from '@/components/ui/Preloader';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 import { siteConfig } from '@/data/site';
+import { getSectionContentFromDb } from '@/lib/db';
+import { defaultSiteContent } from '@/lib/defaultContent';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,55 +22,76 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  keywords: [
-    'construction Madagascar',
-    'gros œuvre',
-    'bâtiment Madagascar',
-    'MPANORINA NOFY',
-    'construction Antananarivo',
-    'entreprise BTP Madagascar',
-    'travaux de construction',
-    'rénovation Madagascar',
-  ],
-  authors: [{ name: siteConfig.name }],
-  creator: siteConfig.name,
-  openGraph: {
-    type: 'website',
-    locale: siteConfig.locale,
-    url: siteConfig.url,
-    siteName: siteConfig.name,
-    title: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
+export async function generateMetadata(): Promise<Metadata> {
+  let isIndexed = true;
+
+  try {
+    const seoData = await getSectionContentFromDb('seo');
+    if (seoData && seoData.isIndexed === false) {
+      isIndexed = false;
+    }
+  } catch (e) {
+    isIndexed = true;
+  }
+
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
+      template: `%s | ${siteConfig.name}`,
+    },
     description: siteConfig.description,
-    images: [
-      {
-        url: '/logo.jpg',
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
+    keywords: [
+      'construction Madagascar',
+      'gros œuvre',
+      'bâtiment Madagascar',
+      'MPANORINA NOFY',
+      'construction Antananarivo',
+      'entreprise BTP Madagascar',
+      'travaux de construction',
+      'rénovation Madagascar',
     ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
-    description: siteConfig.description,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  icons: {
-    icon: '/logo.jpg',
-    apple: '/logo.jpg',
-  },
-};
+    authors: [{ name: siteConfig.name }],
+    creator: siteConfig.name,
+    openGraph: {
+      type: 'website',
+      locale: siteConfig.locale,
+      url: siteConfig.url,
+      siteName: siteConfig.name,
+      title: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
+      description: siteConfig.description,
+      images: [
+        {
+          url: '/logo.jpg',
+          width: 1200,
+          height: 630,
+          alt: siteConfig.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${siteConfig.name} — Construction & Gros Œuvre à Madagascar`,
+      description: siteConfig.description,
+    },
+    robots: isIndexed
+      ? {
+          index: true,
+          follow: true,
+        }
+      : {
+          index: false,
+          follow: false,
+          noarchive: true,
+          nosnippet: true,
+          noimageindex: true,
+        },
+    icons: {
+      icon: '/logo.jpg',
+      apple: '/logo.jpg',
+    },
+  };
+}
 
 export default function RootLayout({
   children,
