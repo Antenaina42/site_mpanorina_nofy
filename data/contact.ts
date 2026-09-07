@@ -1,7 +1,7 @@
 export const contactInfo = {
-  phone: '+261 34 00 000 00',
-  whatsapp: '+261340000000',
-  email: 'contact@mpanorina-nofy.mg',
+  phone: '+261 34 31 221 82',
+  whatsapp: '+261343122182',
+  email: 'mpanorinanofy@gmail.com',
   address: 'Antananarivo, Madagascar',
   fullAddress: 'Lot IVG 123, Antananarivo 101, Madagascar',
   socialMedia: {
