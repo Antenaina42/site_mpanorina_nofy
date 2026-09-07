@@ -17,6 +17,6 @@ export const metadata = {
   title: 'Administration -- MPANORINA NOFY',
 };
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }

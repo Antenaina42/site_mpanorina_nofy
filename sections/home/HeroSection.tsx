@@ -41,11 +41,11 @@ export default function HeroSection() {
     fetchHero();
   }, []);
 
-  // Rotate cinematic lines every 2.2s
+  // Rotate cinematic lines every 4s
   useEffect(() => {
     const interval = setInterval(() => {
       setLineIndex((prev) => (prev + 1) % CINEMATIC_LINES.length);
-    }, 2200);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -96,8 +96,8 @@ export default function HeroSection() {
           transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center gap-4"
         >
-          <div className="w-8 h-[1px] bg-yellow-400" />
-          <span className="text-yellow-400 text-xs tracking-[0.35em] uppercase font-medium">
+          <div className="w-8 h-[1px] bg-gold-500" />
+          <span className="text-gold-500 text-xs tracking-[0.35em] uppercase font-medium">
             MPANORINA NOFY — Madagascar
           </span>
         </motion.div>
@@ -144,12 +144,12 @@ export default function HeroSection() {
                 initial={{ y: '110%', opacity: 0 }}
                 animate={{ y: '0%', opacity: 1 }}
                 exit={{ y: '-110%', opacity: 0 }}
-                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                className="text-[clamp(3.5rem,9vw,8.5rem)] font-display font-black leading-[0.88] tracking-tight uppercase text-yellow-400"
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[clamp(3.5rem,9vw,8.5rem)] font-display font-black leading-[0.88] tracking-tight uppercase text-gold-500"
               >
                 {CINEMATIC_LINES[lineIndex]}
                 <span
-                  className="text-yellow-300"
+                  className="text-gold-400"
                   style={{
                     opacity: showCursor ? 1 : 0,
                     transition: 'opacity 0.1s',
@@ -182,7 +182,7 @@ export default function HeroSection() {
             {/* Primary CTA */}
             <a
               href={heroData?.btnPrimaryHref || '/contact'}
-              className="group relative inline-flex items-center gap-3 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm tracking-widest uppercase px-8 py-4 transition-all duration-300 overflow-hidden"
+              className="group relative inline-flex items-center gap-3 bg-gold-500 hover:bg-gold-400 text-black font-bold text-sm tracking-widest uppercase px-8 py-4 transition-all duration-300 overflow-hidden"
             >
               <span className="relative z-10">
                 {heroData?.btnPrimaryText || 'Démarrer votre œuvre'}
@@ -238,7 +238,7 @@ export default function HeroSection() {
           <div className="flex flex-col items-center gap-3">
             <div className="w-[1px] h-14 bg-white/20 relative overflow-hidden">
               <motion.div
-                className="absolute top-0 left-0 w-full bg-yellow-400"
+                className="absolute top-0 left-0 w-full bg-gold-500"
                 animate={{ height: ['0%', '100%'] }}
                 transition={{ repeat: Infinity, duration: 1.4, ease: 'linear' }}
               />
