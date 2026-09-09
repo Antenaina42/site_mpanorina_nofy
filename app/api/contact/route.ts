@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     const recipientEmail = process.env.CONTACT_EMAIL || 'razakatiana.antenaina@yahoo.com';
 
-    // 1. If SMTP environment variables exist, send via Nodemailer
+    // 1. If SMTP environment variables exist, send via Nodemailer SMTP
     if (process.env.SMTP_HOST && process.env.SMTP_USER) {
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // 2. Fallback Email Delivery via FormSubmit service if SMTP is not configured
+    // 2. Relay via FormSubmit with explicit browser origin & referer headers
     const formSubmitPayload = {
       _subject: `[Devis MPANORINA NOFY] ${buildingType} - ${name} (${location})`,
       _replyto: email,
@@ -104,16 +104,25 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Origin': 'https://mpanorina-nofy.com',
+        'Referer': 'https://mpanorina-nofy.com/contact',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
       body: JSON.stringify(formSubmitPayload),
     });
 
     const fsData = await fsResponse.json();
-    console.log('[FormSubmit Result]:', fsData);
+    console.log('[FormSubmit API Response]:', fsData);
+
+    const isPendingActivation =
+      fsData?.message && fsData.message.toLowerCase().includes('activation');
 
     return NextResponse.json({
       success: true,
-      message: 'Votre demande a été envoyée avec succès.',
+      message: isPendingActivation
+        ? 'Un email d\'activation a été envoyé à ' + recipientEmail + '. Veuillez cliquer sur "Activate Form" dans votre boîte mail pour autoriser la réception immédiate des formulaires.'
+        : 'Votre demande a été envoyée avec succès.',
+      isPendingActivation,
     });
   } catch (error) {
     console.error('Error handling contact form submission:', error);
