@@ -200,11 +200,11 @@ export default function HeroSection() {
 
             {/* Secondary ghost CTA */}
             <a
-              href={heroData?.btnSecondaryHref || '/realisations'}
+              href={heroData?.btnSecondaryHref || '/services'}
               className="group inline-flex items-center gap-3 text-white/60 hover:text-white text-sm tracking-widest uppercase transition-colors duration-300"
             >
               <span className="w-6 h-[1px] bg-white/40 group-hover:w-10 group-hover:bg-white transition-all duration-300" />
-              {heroData?.btnSecondaryText || 'Voir nos réalisations'}
+              {heroData?.btnSecondaryText || 'Nos services'}
             </a>
           </motion.div>
         </div>

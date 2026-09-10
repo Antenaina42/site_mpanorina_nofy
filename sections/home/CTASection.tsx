@@ -80,11 +80,11 @@ export default function CTASection() {
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
           </a>
           <a
-            href="/realisations"
+            href="/services"
             className="group inline-flex items-center gap-3 text-white/50 hover:text-white text-sm tracking-widest uppercase transition-colors duration-300 py-5"
           >
             <span className="w-6 h-[1px] bg-white/30 group-hover:w-10 group-hover:bg-white transition-all duration-300" />
-            Voir nos realisations
+            Découvrir nos services
           </a>
         </motion.div>
       </div>

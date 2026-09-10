@@ -3,7 +3,6 @@ import IntroSection from '@/sections/home/IntroSection';
 import StatsSection from '@/sections/home/StatsSection';
 import ServicesSection from '@/sections/home/ServicesSection';
 import ApproachSection from '@/sections/home/ApproachSection';
-import ProjectsSection from '@/sections/home/ProjectsSection';
 import VideoSection from '@/sections/home/VideoSection';
 import ExpertiseSection from '@/sections/home/ExpertiseSection';
 import ProcessSection from '@/sections/home/ProcessSection';
@@ -17,7 +16,6 @@ export default function HomePage() {
       <StatsSection />
       <ServicesSection />
       <ApproachSection />
-      <ProjectsSection />
       <VideoSection />
       <ExpertiseSection />
       <ProcessSection />
